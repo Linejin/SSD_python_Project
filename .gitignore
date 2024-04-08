@@ -186,3 +186,6 @@ log/
 Ast.py
 *.svg
 *.png
+
+# project idea folder
+.idea/
