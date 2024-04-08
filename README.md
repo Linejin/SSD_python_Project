@@ -27,8 +27,7 @@ SSD를 관리하는 module
 <details>
 
 ## ClassName: _Device
-실질적으로 SSD를 관리하는 함수를 갖고 있는 class
-
+실질적으로 SSD를 관리하는 함수를 갖고 있는 class<br>
 nand.txt를 관리
 
 - Function: `__init__()`
