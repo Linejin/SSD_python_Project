@@ -22,30 +22,12 @@ python SSD.py [Command]
 
 
 
-
-<style>
-  /* details 요소를 좀 더 꾸미기 */
-  details {
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 0.5em;
-    margin-bottom: 1em;
-  }
-  
-  /* summary 요소의 스타일 변경 */
-  summary {
-    cursor: pointer;
-    font-weight: bold;
-    outline: none; /* 포커스 시에 파란 테두리를 제거합니다. */
-  }
-</style>
-
 ---
 
 # FileName: `Logger.py`
 로그를 출력하는 module
 
-<details>
+<details close>
 
 ## ClassName: Logger
 
