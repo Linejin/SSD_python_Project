@@ -181,3 +181,6 @@ log/
 
 # Data Files
 *.txt-
+
+# Ast.py
+Ast.py

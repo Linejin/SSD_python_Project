@@ -22,7 +22,7 @@ class _Device:
                 data = b'\0' * self.__NAND_LBA_SIZE * self.__VALUE_BYTE_LENGTH
                 file.write(data)
 
-    def read_LBA_VALUE(self, LBA) -> str:
+    def read_LBA_VALUE(self, LBA: int) -> str:
         with open(self.__NAND_FILE_NAME, 'rb') as file:
             file.seek(LBA * self.__VALUE_BYTE_LENGTH)
             data = file.read(self.__VALUE_BYTE_LENGTH)
@@ -32,7 +32,7 @@ class _Device:
             hex_result = '0X' + hex_string
             return hex_result
 
-    def write_LBA_VALUE(self, LBA, VALUE) -> None:
+    def write_LBA_VALUE(self, LBA: int, VALUE: str) -> None:
         try:
             hex_data = int(VALUE[2:], 16)
         except ValueError:
@@ -44,7 +44,7 @@ class _Device:
             file.seek(LBA * self.__VALUE_BYTE_LENGTH)
             file.write(data)
 
-    def erase_LBA_VALUE(self, LBA, SIZE) -> None:
+    def erase_LBA_VALUE(self, LBA: int, SIZE: int) -> None:
         with open(self.__NAND_FILE_NAME, 'rb+') as file:
             data = b'0' * SIZE * self.__VALUE_BYTE_LENGTH
             file.seek(LBA * self.__VALUE_BYTE_LENGTH)
@@ -131,8 +131,9 @@ class _SSDReadCommand(_SSDCommand):
                 Value = commandList[index].VALUE
             else:
                 Value = self.device.read_LBA_VALUE(LBA)
-            if self.buffer.mode != "test":
-                self.__write_result(Value)
+            if self.buffer.mode == "main":
+                print(self.__write_result(Value))
+            self.__write_result(Value)
 
 
 class _SSDCommandBuffer:
@@ -191,7 +192,7 @@ class _SSDCommandBuffer:
     def get_Command_List(self) -> List[_SSDCommand]:
         return self.__Command_List
 
-    def insert(self, params) -> None:
+    def insert(self, params: List[str]) -> None:
         command_type = params[0]
         if command_type == 'W':
             LBA = int(params[1])
@@ -235,7 +236,7 @@ class SSD:
         self.buffer = _SSDCommandBuffer(self.device, mode)
 
     def __print_Error_Message(self, message: str) -> None:
-        if self.mode != "test":
+        if self.mode != "Test":
             print(message)
 
     def __isValid_LBA(self, LBA: str) -> bool:
