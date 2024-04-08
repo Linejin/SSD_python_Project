@@ -184,3 +184,5 @@ log/
 
 # Ast.py
 Ast.py
+*.svg
+*.png
