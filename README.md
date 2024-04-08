@@ -39,8 +39,6 @@ python SSD.py [Command]
     outline: none; /* 포커스 시에 파란 테두리를 제거합니다. */
   }
 </style>
-<summary>접기/펼치기</summary>
-</details>
 
 ---
 
