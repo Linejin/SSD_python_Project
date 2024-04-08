@@ -20,68 +20,217 @@ python SSD.py [Command]
 
 
 
-
-
 ---
 
-# FileName: `Logger.py`
-로그를 출력하는 module
+# FileName: `SSD.py`
+SSD를 관리하는 module
+<details>
 
-<details close>
+## ClassName: _Device
+실질적으로 SSD를 관리하는 함수를 갖고 있는 class
+nand.txt를 관리
 
-## ClassName: Logger
+- Function: `__init__()`
+  - Return: `None`
+<br>
+
+- Function: `__init_File()`
+  - Return: `None`
+  - Description
+    - 관리할 SSD file을 읽습니다.
+    - 해당 SSD file이 없으면 생성합니다.
+<br>
+
+- Function: `read_LBA_VALUE(LBA: int)`
+  - Return: `str`
+  - Description
+    - SSD file로 부터 LBA의 VALUE를 읽어옵니다.
+<br>
+
+- Function: `write_LBA_VALUE(LBA: int, VALUE: str)`
+  - Return: `None`
+  - Description
+    - SSD file의 LBA에 VALUE를 씁니다.
+<br>
+
+- Function: `erase_LBA_VALUE(LBA: int, SIZE: int)`
+  - Return: `None`
+  - Description
+    -  SSD file의 LBA에서부터 SIZE만큼의 VALUE를 삭제합니다.
+<br>
+
+## ClassName: _SSDCommand
+SSD를 관리하는 Command에 대한 추상화 class
+SSD명령어 간의 LBA적 관계를 비교할 수 있는 기능이 들어간 Command pattern 구조
+
+- Function: `__init__(CommandLine: str, device: _Device)`
+  - Return: `None`
+  - Description
+    - `_Device`에 CommandLine이라는 명령어로 세팅
+    - CommandLine은 `CommandType StartLBA EndLBA VALUE` 형태로 주어짐
+<br>
+
+- Function: `is_Overlap(other: _SSDCommand)`
+  - Return: `bool`
+  - Description
+    - `other`와 LBA가 겹치는지 확인
+<br>
+  
+- Function: `is_Include(other: _SSDCommand)`
+  - Return: `bool`
+  - Description
+    - `other`를 내포하고 있는지 확인
+<br>
+
+- Function: `execute()`
+  - Return: `None`
+  - Description
+    - 해당 SSDCommand를 실행
+<br>
+
+- Function: `to_String()`
+  - Return: `str`
+  - Description
+    - 해당 Command를 문자열로 표현하여 반환
+<br>
+
+## ClassName: _SSDWriteCommand
+- Function: `split(LBA_LEFT: None, LBA_RIGHT: None)`
+  - Return: `(_SSDCommand, _SSDCommand)`
+  - Description
+    - LBA_LEFT~LBA_RIGHT 구간인 명령어와 겹치는 구간을 지우고, 그 외의 두 구간으로 명령어를 쪼갭니다.
+<br>
+
+- Function: `execute()`
+  - Return: `None`
+  - Description
+    - SSD write 실행
+<br>
+
+## ClassName: _SSDReadCommand
+- Function: `setBuffer(buffer: None)`
+  - Return: `None`
+  - Description
+    - Fast read를 위한 buffer 세팅
+<br>
+
+- Function: `__write_result(text: str)`
+  - Return: `None`
+  - Description
+    - `result.txt`에 read된 Value 쓰기
+<br>
+
+- Function: `execute()`
+  - Return: `None`
+  - Description
+    - SSD read 실행
+    - SSD의 mode가 `main`인 경우 console에 출력
+<br>
+
+## ClassName: _SSDCommandBuffer
+`_SSDCommand`들을 관리하는 Buffer
+erase 명령어는 write 명령어로 변환하여 사용
+
+- Function: `__init__(device: _Device, mode: None)`
+  - Return: `None`
+  - Description
+    - device에 해당하는 명령어들을 관리하는 buffer
+<br>
+
+- Function: `__init_File()`
+  - Return: `None`
+  - Description
+    - buffer를 관리할 file 세팅
+<br>
+
+- Function: `__insert_Command(command: _SSDCommand)`
+  - Return: `None`
+  - Description
+    - buffer에 `_SSDCommand`를 추가하는 내부 명령어
+<br>
+
+- Function: `__write_Command_List()`
+  - Return: `None`
+  - Description
+    - buffer를 관리하는 file에 명령어 기록
+<br>
+
+- Function: `get_Command_List()`
+  - Return: `List[_SSDCommand]`
+  - Description
+    - 내부적으로 관리하는 Command List를 반환
+<br>
+
+- Function: `insert(params: List[str])`
+  - Return: `None`
+  - Description
+    - 외부에서 명령어를 주면 그에 맞게 Factory 형식처럼 Command를 생성하여 Command List에 등록
+<br>
+
+- Function: `flush()`
+  - Return: `None`
+  - Description
+    - 내부에 관리하고 있던 Command들을 강제 실행 및 내부 Command List 비우기
+<br>
+
+## ClassName: SSD
+SSD를 전체적으로 관리하는 class
+mode에 맞게 `_device`, `buffer`를 생성 및 관리
+
+- Function: `__new__(cls: None)`
+  - Return: `None`
+  - Description
+    - Singleton 구조의 SSD를 생성
+<br>
 
 - Function: `__init__(mode: None)`
   - Return: `None`
   - Description
-    - 기본은 Shell mode로 실행
-    - Test로 실행시 로그 출력이 안되도록 구성할 수 있음(현재는 해당 기능을 제외해뒀음)
+    - SSD의 mode 및 _Device, Buffer 세팅
 <br>
 
-- Function: `__Compress_File()`
+- Function: `__print_Error_Message(message: str)`
+  - Return: `None`
+  - Description
+    - `message`에 해당하는 에러 메시지 출력
+    - 단, `Test` mode에서는 출력하지 않음
+<br>
+
+- Function: `__isValid_LBA(LBA: str)`
   - Return: `bool`
   - Description
-    - 특정 개수 이상의 log file이 생성(현재는 2개)되면 가장 일찍 만들어진 log file을 zip file으로 compression
+    - LBA의 유효성 확인
 <br>
 
-- Function: `__renaming_latest()`
+- Function: `__isValid_Value(Value: str)`
   - Return: `bool`
   - Description
-    - 작성 중이던 `latest.log`가 특정 byte이상 (현재는 10kb)
+    - Valud의 유효성 확인
 <br>
 
-- Function: `__get_calling_function_and_class(stack_index: int)`
-  - Return: `(calling_class: str, calling_function: str)`
+- Function: `__isValid_Size(LBA: str, size: str)`
+  - Return: `bool`
   - Description
-    - 로그에 `className.functionName`을 출력하기 위하여 write_log를 호출한 className과 functionName을 찾는 함수
+    - Size의 유효성 확인
 <br>
 
-- Function: `setLogFileMaxCount(cnt: int)`
+- Function: `__isValid_argv(command: List[str])`
   - Return: `None`
   - Description
-    - 유지할 log file 개수를 세팅하는 함수
-    - 해당 cnt보다 더 많은 개수의 log file이 생성되면 compression 진행
+    - argv형태의 명령어 유효성 확인
 <br>
 
-- Function: `setLogFileMaxSize(size: int)`
+- Function: `run_Command(argv: List[str])`
   - Return: `None`
   - Description
-    - `latest.log`를 유지할 크기를 세팅하는 함수
-    - 기록된 이후 해당 size KB가 넘어가면 `__renaming_latest()`실행
-<br>
-
-- Function: `write_log(message: str, stack_index: int)`
-  - Return: `None`
-  - Description
-    - `latest.log`에 message를 기록하는 함수
-    - `stack_index`는 기록할 className과 functionName의 깊이 정도
+    - 명령어를 SSDCommand에 맞게 변환 후 buffer에 등록
 <br>
 
 <summary>접기/펼치기</summary>
 </details>
 
----
 
+---
 
 # FileName: `Shell.py`
 SSD를 다루는 Shell을 실행하는 module
@@ -304,208 +453,57 @@ Shell Command의 추상화된 class
 
 ---
 
-# FileName: `SSD.py`
-SSD를 관리하는 module
-<details>
+# FileName: `Logger.py`
+로그를 출력하는 module
 
-## ClassName: _Device
-실질적으로 SSD를 관리하는 함수를 갖고 있는 class
-nand.txt를 관리
+<details close>
 
-- Function: `__init__()`
-  - Return: `None`
-<br>
-
-- Function: `__init_File()`
-  - Return: `None`
-  - Description
-    - 관리할 SSD file을 읽습니다.
-    - 해당 SSD file이 없으면 생성합니다.
-<br>
-
-- Function: `read_LBA_VALUE(LBA: int)`
-  - Return: `str`
-  - Description
-    - SSD file로 부터 LBA의 VALUE를 읽어옵니다.
-<br>
-
-- Function: `write_LBA_VALUE(LBA: int, VALUE: str)`
-  - Return: `None`
-  - Description
-    - SSD file의 LBA에 VALUE를 씁니다.
-<br>
-
-- Function: `erase_LBA_VALUE(LBA: int, SIZE: int)`
-  - Return: `None`
-  - Description
-    -  SSD file의 LBA에서부터 SIZE만큼의 VALUE를 삭제합니다.
-<br>
-
-## ClassName: _SSDCommand
-SSD를 관리하는 Command에 대한 추상화 class
-SSD명령어 간의 LBA적 관계를 비교할 수 있는 기능이 들어간 Command pattern 구조
-
-- Function: `__init__(CommandLine: str, device: _Device)`
-  - Return: `None`
-  - Description
-    - `_Device`에 CommandLine이라는 명령어로 세팅
-    - CommandLine은 `CommandType StartLBA EndLBA VALUE` 형태로 주어짐
-<br>
-
-- Function: `is_Overlap(other: _SSDCommand)`
-  - Return: `bool`
-  - Description
-    - `other`와 LBA가 겹치는지 확인
-<br>
-  
-- Function: `is_Include(other: _SSDCommand)`
-  - Return: `bool`
-  - Description
-    - `other`를 내포하고 있는지 확인
-<br>
-
-- Function: `execute()`
-  - Return: `None`
-  - Description
-    - 해당 SSDCommand를 실행
-<br>
-
-- Function: `to_String()`
-  - Return: `str`
-  - Description
-    - 해당 Command를 문자열로 표현하여 반환
-<br>
-
-## ClassName: _SSDWriteCommand
-- Function: `split(LBA_LEFT: None, LBA_RIGHT: None)`
-  - Return: `(_SSDCommand, _SSDCommand)`
-  - Description
-    - LBA_LEFT~LBA_RIGHT 구간인 명령어와 겹치는 구간을 지우고, 그 외의 두 구간으로 명령어를 쪼갭니다.
-<br>
-
-- Function: `execute()`
-  - Return: `None`
-  - Description
-    - SSD write 실행
-<br>
-
-## ClassName: _SSDReadCommand
-- Function: `setBuffer(buffer: None)`
-  - Return: `None`
-  - Description
-    - Fast read를 위한 buffer 세팅
-<br>
-
-- Function: `__write_result(text: str)`
-  - Return: `None`
-  - Description
-    - `result.txt`에 read된 Value 쓰기
-<br>
-
-- Function: `execute()`
-  - Return: `None`
-  - Description
-    - SSD read 실행
-    - SSD의 mode가 `main`인 경우 console에 출력
-<br>
-
-## ClassName: _SSDCommandBuffer
-`_SSDCommand`들을 관리하는 Buffer
-erase 명령어는 write 명령어로 변환하여 사용
-
-- Function: `__init__(device: _Device, mode: None)`
-  - Return: `None`
-  - Description
-    - device에 해당하는 명령어들을 관리하는 buffer
-<br>
-
-- Function: `__init_File()`
-  - Return: `None`
-  - Description
-    - buffer를 관리할 file 세팅
-<br>
-
-- Function: `__insert_Command(command: _SSDCommand)`
-  - Return: `None`
-  - Description
-    - buffer에 `_SSDCommand`를 추가하는 내부 명령어
-<br>
-
-- Function: `__write_Command_List()`
-  - Return: `None`
-  - Description
-    - buffer를 관리하는 file에 명령어 기록
-<br>
-
-- Function: `get_Command_List()`
-  - Return: `List[_SSDCommand]`
-  - Description
-    - 내부적으로 관리하는 Command List를 반환
-<br>
-
-- Function: `insert(params: List[str])`
-  - Return: `None`
-  - Description
-    - 외부에서 명령어를 주면 그에 맞게 Factory 형식처럼 Command를 생성하여 Command List에 등록
-<br>
-
-- Function: `flush()`
-  - Return: `None`
-  - Description
-    - 내부에 관리하고 있던 Command들을 강제 실행 및 내부 Command List 비우기
-<br>
-
-## ClassName: SSD
-SSD를 전체적으로 관리하는 class
-mode에 맞게 `_device`, `buffer`를 생성 및 관리
-
-- Function: `__new__(cls: None)`
-  - Return: `None`
-  - Description
-    - Singleton 구조의 SSD를 생성
-<br>
+## ClassName: Logger
 
 - Function: `__init__(mode: None)`
   - Return: `None`
   - Description
-    - SSD의 mode 및 _Device, Buffer 세팅
+    - 기본은 Shell mode로 실행
+    - Test로 실행시 로그 출력이 안되도록 구성할 수 있음(현재는 해당 기능을 제외해뒀음)
 <br>
 
-- Function: `__print_Error_Message(message: str)`
-  - Return: `None`
-  - Description
-    - `message`에 해당하는 에러 메시지 출력
-    - 단, `Test` mode에서는 출력하지 않음
-<br>
-
-- Function: `__isValid_LBA(LBA: str)`
+- Function: `__Compress_File()`
   - Return: `bool`
   - Description
-    - LBA의 유효성 확인
+    - 특정 개수 이상의 log file이 생성(현재는 2개)되면 가장 일찍 만들어진 log file을 zip file으로 compression
 <br>
 
-- Function: `__isValid_Value(Value: str)`
+- Function: `__renaming_latest()`
   - Return: `bool`
   - Description
-    - Valud의 유효성 확인
+    - 작성 중이던 `latest.log`가 특정 byte이상 (현재는 10kb)
 <br>
 
-- Function: `__isValid_Size(LBA: str, size: str)`
-  - Return: `bool`
+- Function: `__get_calling_function_and_class(stack_index: int)`
+  - Return: `(calling_class: str, calling_function: str)`
   - Description
-    - Size의 유효성 확인
+    - 로그에 `className.functionName`을 출력하기 위하여 write_log를 호출한 className과 functionName을 찾는 함수
 <br>
 
-- Function: `__isValid_argv(command: List[str])`
+- Function: `setLogFileMaxCount(cnt: int)`
   - Return: `None`
   - Description
-    - argv형태의 명령어 유효성 확인
+    - 유지할 log file 개수를 세팅하는 함수
+    - 해당 cnt보다 더 많은 개수의 log file이 생성되면 compression 진행
 <br>
 
-- Function: `run_Command(argv: List[str])`
+- Function: `setLogFileMaxSize(size: int)`
   - Return: `None`
   - Description
-    - 명령어를 SSDCommand에 맞게 변환 후 buffer에 등록
+    - `latest.log`를 유지할 크기를 세팅하는 함수
+    - 기록된 이후 해당 size KB가 넘어가면 `__renaming_latest()`실행
+<br>
+
+- Function: `write_log(message: str, stack_index: int)`
+  - Return: `None`
+  - Description
+    - `latest.log`에 message를 기록하는 함수
+    - `stack_index`는 기록할 className과 functionName의 깊이 정도
 <br>
 
 <summary>접기/펼치기</summary>
