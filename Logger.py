@@ -28,7 +28,7 @@ class Logger:
         except:
             return False
 
-    def __renameing_latest(self) -> bool:
+    def __renaming_latest(self) -> bool:
         if self.__LOG_FILE_MAX_SIZE > os.path.getsize(self.__LOG_FULLPATH):
             return False
         try:
@@ -50,6 +50,12 @@ class Logger:
 
         return calling_class, calling_function
 
+    def setLogFileMaxCount(self, cnt: int) -> None:
+        self.__LOG_FILE_MAX_COUNT = cnt
+
+    def setLogFileMaxSize(self, size: int) -> None:
+        self.__LOG_FILE_MAX_SIZE = size * 1024
+
     def write_log(self, message: str, stack_index: int = 0) -> None:
         with open(self.__LOG_FULLPATH, 'a') as file:
             current_datetime = datetime.now()
@@ -57,5 +63,5 @@ class Logger:
             calling_class, calling_function = self.__get_calling_function_and_class(stack_index)
             formatted_calling = f"{calling_class or 'None'}.{calling_function or 'None'}()"
             file.write(f'[{formatted_datetime}] {formatted_calling:45} : {message}\n')
-        if self.__renameing_latest():
+        if self.__renaming_latest():
             self.__Compress_File()

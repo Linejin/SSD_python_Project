@@ -5,7 +5,7 @@ import importlib.util
 import os
 
 class Runner:
-    def __init__(self, mode, test_file_list: List[str] = None):
+    def __init__(self, mode: str, test_file_list: List[str] = None):
         self.__mode = mode
         self.__TEST_FILE_LIST = test_file_list
 
@@ -19,7 +19,7 @@ class Runner:
             command = input().upper().split()
             self.__run_Command(command)
 
-    def __run_test(self, filename):
+    def __run_test(self, filename: str) -> bool:
         # 파일이 존재하는지 확인
         if not os.path.exists(filename):
             print(f"File '{filename}' does not exist.")
@@ -68,19 +68,19 @@ class Shell:
 
     @classmethod
     def create_Shell(cls, argv: List[str]) -> 'Shell':
-        test_txt_list = argv[1:]
-        if test_txt_list:
-            if cls.__check_Txt_Extension(test_txt_list):
-                return cls("Test", test_txt_list)
+        test_file_list = argv[1:]
+        if test_file_list:
+            if cls.__check_Py_Extension(test_file_list):
+                return cls("Test", test_file_list)
             else:
                 return None
         else:
             return cls("Shell", None)
 
     @staticmethod
-    def __check_Txt_Extension(test_txt_list: List[str]) -> bool:
-        for arg in test_txt_list:
-            if not arg.endswith(".py"):
+    def __check_Py_Extension(test_py_files: List[str]) -> bool:
+        for file in test_py_files:
+            if not file.endswith(".py"):
                 return False
         return True
 

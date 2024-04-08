@@ -1,6 +1,6 @@
 import sys, struct
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Dict, Optional
 from SSD import SSD
 from Logger import Logger
 
@@ -157,15 +157,15 @@ class _ShellFullreadCommand(_ShellCommand):
             pass
         return value
 
-    def execute(self) -> None:
+    def execute(self) -> Optional[Dict]:
         result = dict()
         if self._command[0] == "FULLREAD" and len(self._command) == 1:
             for LBA in range(100):
                 self._ssd.run_Command(["R", str(LBA)])
                 result[LBA] = self.__read_result(LBA)
-            return result
         else:
             self._print_Message("Please use the format 'fullread'.")
+        return result
 
 
 class _ShellInvalidCommand(_ShellCommand):
